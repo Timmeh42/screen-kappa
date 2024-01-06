@@ -1,163 +1,80 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import EmptyState from './components/EmptyState.vue';
+import RecordingState from './components/RecordingState.vue';
+import PreviewState from './components/PreviewState.vue';
+import ErrorState from './components/ErrorState.vue';
+import { State } from './states';
+import SelectionState from './components/SelectionState.vue';
 
-function assertIsDefined<T> (value: T): asserts value is NonNullable<T> {
-  if (value === undefined || value === null) {
-    throw new Error(`Expected value to be defined but found ${value}`);
-  }
-}
+const state = ref<State>(State.Empty);
+const error = ref<DOMException | null>(null);
+const mediaStream = ref<MediaStream | null>(null);
 
-const videoDisplayElement = ref<HTMLVideoElement | null>(null);
-let videoDisplayStream: MediaStream | null = null;
-const streaming = ref(false);
-const recording = ref(false);
-let recordedChunks: Blob[] = [];
-let mediaRecorder: MediaRecorder | null = null;
-
-
-const requestStream = () => {
-  if (streaming.value === true) {
-    return;
-  }
-  navigator.mediaDevices
-    .getDisplayMedia({
-      video: true,
-      audio: true,
-    })
-    .then((stream) => {
-      streaming.value = true;
-      for (const streamTrack of stream.getTracks()) {
-        streamTrack.addEventListener('ended', onStreamStopped);
-      }
-      videoDisplayStream = stream;
-      if (videoDisplayElement.value !== null) {
-        videoDisplayElement.value.srcObject = stream;
-        videoDisplayElement.value.play();
-      }
-    })
-    .catch(() => {
-      // rejected or some other error
-      window.location.reload();
-    })
-  ;
-};
-
-const onStreamStopped = () => {
-  if (videoDisplayStream === null) return;
-
-  const allStreamsStopped = videoDisplayStream
-    .getTracks()
-    .every((track) => track.readyState === 'ended')
-  ;
-
-  if (allStreamsStopped === true) {
-    stopStream();
-  }
-};
-
-const stopStream = () => {
-  if (streaming.value === false) {
-    return;
-  }
-
-  if (videoDisplayStream !== null) {
-    for (const track of videoDisplayStream.getTracks()) {
+watch(mediaStream, (newMediaStream, oldMediaStream) => {
+  if (newMediaStream === null && oldMediaStream !== null) {
+    for (const track of oldMediaStream.getTracks()) {
       track.stop();
     }
-    videoDisplayStream = null;
   }
+});
 
-  streaming.value = false;
+const setState = (newState: State) => {
+  state.value = newState;
 };
 
-const startRecording = () => {
-  assertIsDefined(videoDisplayStream);
-
-  mediaRecorder = new MediaRecorder(videoDisplayStream, {
-    mimeType: 'video/webm;codecs=vp8',
-  });
-
-  mediaRecorder.start();
-  mediaRecorder.ondataavailable = (blobEvent) => {
-    recordedChunks.push(blobEvent.data);
-  };
-
-  mediaRecorder.onstop = () => {
-    assertIsDefined(videoDisplayElement.value);
-    const videoBlob = new Blob(recordedChunks, { type: 'video/webm;codecs=vp8' });
-    videoDisplayElement.value.srcObject = null;
-    videoDisplayElement.value.src = URL.createObjectURL(videoBlob);
-    videoDisplayElement.value.controls = true;
-    console.log({ recordedChunks, url: videoDisplayElement.value.src });
-  };
-
-  recording.value = true;
+const setStream = (stream: MediaStream | null) => {
+  mediaStream.value = stream;
 };
 
-const stopRecording = () => {
-  assertIsDefined(mediaRecorder);
-
-  mediaRecorder.stop();
-  recording.value = false;
-};
-
-const resetStream = () => {
-  stopStream();
-
-  if (videoDisplayElement.value !== null) {
-    videoDisplayElement.value.srcObject = null;
-    videoDisplayElement.value.controls = false;
-    videoDisplayElement.value.src = '';
-  }
-
-  recordedChunks = [];
+const setError = (newError: DOMException | null) => {
+  error.value = newError;
 };
 
 </script>
 
 <template>
-  <div>
-    <video
-      ref="videoDisplayElement"
-      disable-picture-in-picture
-    />
-    <div>
-      <button
-        v-if="streaming === false"
-        @click="requestStream"
-      >
-        Preview
-      </button>
-      <button
-        v-if="streaming === true"
-        @click="stopStream"
-      >
-        Stop preview
-      </button>
-      <button
-        v-if="streaming === true && recording === false"
-        @click="startRecording"
-      >
-        Record
-      </button>
-      <button
-        v-if="streaming === true && recording === true"
-        @click="stopRecording"
-      >
-        Stop recording
-      </button>
-      <button
-        v-if="videoDisplayElement?.srcObject !== null"
-        @click="resetStream"
-      >
-        Reset
-      </button>
+  <div class="container">
+    <div class="center-column">
+      <EmptyState
+        v-if="state === State.Empty"
+        @set-state="setState"
+      />
+      <SelectionState
+        v-if="state === State.Selection"
+        @set-state="setState"
+        @set-stream="setStream"
+        @set-error="setError"
+      />
+      <PreviewState
+        v-if="state === State.Preview"
+        :stream="mediaStream"
+        @set-state="setState"
+        @set-stream="setStream"
+      />
+      <RecordingState
+        v-if="state === State.Recording"
+        :stream="mediaStream"
+        @set-state="setState"
+        @set-stream="setStream"
+      />
+      <ErrorState
+        v-if="state === State.Error"
+        :error="error"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-video {
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.center-column {
+  padding-top: 40px;
   width: 400px;
 }
 </style>
