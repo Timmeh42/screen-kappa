@@ -12,7 +12,6 @@ type Recording = {
   label: string;
   created: number;
   length: number;
-  thumbnail: string;
 };
 
 const state = ref<AnyState>({ name: State.Empty });

@@ -10,7 +10,6 @@ type Recording = {
   label: string;
   created: number;
   length: number;
-  thumbnail: string;
 };
 
 const props = defineProps<{
@@ -31,7 +30,6 @@ const firstVideoTrack = props.state.mediaStream.getVideoTracks().pop();
 if (firstVideoTrack !== undefined) {
   streamLabel = firstVideoTrack.label;
 }
-let thumbnail = '';
 
 const recordedChunks: Blob[] = [];
 const mediaRecorder = new MediaRecorder(props.state.mediaStream, {
@@ -41,9 +39,6 @@ const mediaRecorder = new MediaRecorder(props.state.mediaStream, {
 mediaRecorder.start();
 mediaRecorder.ondataavailable = (blobEvent) => {
   recordedChunks.push(blobEvent.data);
-  if (videoElement.value !== null) {
-    thumbnail = generateThumbnail(videoElement.value);
-  }
 };
 
 mediaRecorder.onstop = () => {
@@ -53,31 +48,10 @@ mediaRecorder.onstop = () => {
     label: streamLabel,
     created: Date.now(),
     length: Date.now() - startTime,
-    thumbnail,
   };
   emit('recordingComplete', recording);
   const newState: PreviewState = { name: State.Preview, mediaStream: props.state.mediaStream };
   emit('setState', newState);
-};
-
-const generateThumbnail = (videoElement: HTMLVideoElement, width = 200, height = 150): string => {
-  const canvasElement = document.createElement('canvas');
-  canvasElement.width = width;
-  canvasElement.height = height;
-  const videoWidth = videoElement.videoWidth;
-  const videoHeight = videoElement.videoHeight;
-  const ratio = Math.min(width / videoWidth, height / videoHeight);
-  const drawWidth = ratio * videoWidth;
-  const drawHeight = ratio * videoHeight;
-  const offsetX = (width - drawWidth) / 2;
-  const offsetY = (height - drawHeight) / 2;
-  const drawContext = canvasElement.getContext('2d') as CanvasRenderingContext2D;
-  if (drawContext !== null) {
-    drawContext.fillStyle = 'black';
-    drawContext.fillRect(0, 0, width, height);
-    drawContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight, offsetX, offsetY, drawWidth, drawHeight);
-  }
-  return canvasElement.toDataURL();
 };
 
 const stopSharing = () => {

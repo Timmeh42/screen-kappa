@@ -6,7 +6,6 @@ type Recording = {
   label: string;
   created: number;
   length: number;
-  thumbnail: string;
 };
 
 const props = defineProps<{
