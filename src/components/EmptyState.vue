@@ -2,18 +2,18 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import type { EmptyState, ErrorState, AnyState, SelectionState } from '@/states';
+import type { EmptyStateObject, ErrorStateObject, AnyStateObject, SelectionStateObject } from '@/states';
 
 defineProps<{
-  state: EmptyState | ErrorState;
+  state: EmptyStateObject | ErrorStateObject;
 }>();
 
 const emit = defineEmits<{
-  setState: [state: AnyState];
+  setState: [state: AnyStateObject];
 }>();
 
 const startSelection = () => {
-  const newState: SelectionState = { name: 'SelectionState' };
+  const newState: SelectionStateObject = { name: 'SelectionState' };
   emit('setState', newState);
 };
 

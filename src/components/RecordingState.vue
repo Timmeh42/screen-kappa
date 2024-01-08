@@ -2,15 +2,15 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import type { AnyState, Recording, PreviewState, RecordingState } from '@/states';
+import type { AnyStateObject, Recording, RecordingStateObject, EditStateObject } from '@/states';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{
-  state: RecordingState;
+  state: RecordingStateObject;
 }>();
 
 const emit = defineEmits<{
-  setState: [state: AnyState];
+  setState: [state: AnyStateObject];
   recordingComplete: [recording: Recording];
 }>();
 
@@ -42,8 +42,12 @@ mediaRecorder.onstop = () => {
     created: Date.now(),
     length: Date.now() - startTime,
   };
+  // stopping the tracks notifies the browser that the screen is no longer being shared
+  for (const track of props.state.mediaStream.getTracks()) {
+    track.stop();
+  }
   emit('recordingComplete', recording);
-  const newState: PreviewState = { name: 'PreviewState', mediaStream: props.state.mediaStream };
+  const newState: EditStateObject = { name: 'EditState', recording: recording, recordingId: 0 };
   emit('setState', newState);
 };
 

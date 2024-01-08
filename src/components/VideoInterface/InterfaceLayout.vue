@@ -20,10 +20,6 @@
 </template>
 
 <style>
-.preview-container {
-  border: 1px solid black;
-}
-
 .preview-ui {
   background-color: black;
   display: flex;
@@ -36,6 +32,8 @@
 
 .preview-video {
   position: relative;
+  border: 1px solid black;
+  border-width: 0 1px;
 }
 
 .video-placeholder {
@@ -51,6 +49,7 @@
   flex-direction: column;
   align-content: center;
   justify-content: center;
+  pointer-events: none;
 }
 
 .video-overlay-content:not(:empty) {
@@ -58,5 +57,6 @@
   color: white;
   background-color: rgba(100, 100, 100, 0.7);
   padding: 8px;
+  pointer-events: all;
 }
 </style>

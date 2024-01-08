@@ -19,13 +19,13 @@ const props = defineProps<{
 <style lang="scss">
 .preview-ui-button {
   margin: 4px;
-  padding: 4px 5px;
+  padding: 5px 6px 4px;
   color: black;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid white;
   background-color: white;
 

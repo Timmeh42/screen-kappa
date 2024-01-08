@@ -2,14 +2,14 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import type { SelectionState, AnyState, PreviewState, ErrorState } from '@/states';
+import type { SelectionStateObject, AnyStateObject, PreviewStateObject, ErrorStateObject } from '@/states';
 
 defineProps<{
-  state: SelectionState;
+  state: SelectionStateObject;
 }>();
 
 const emit = defineEmits<{
-  setState: [state: AnyState];
+  setState: [state: AnyStateObject];
 }>();
 
 // record the time when we request a screen share
@@ -21,21 +21,21 @@ navigator.mediaDevices
     audio: true,
   })
   .then((mediaStream) => {
-    const newState: PreviewState = { name: 'PreviewState', mediaStream: mediaStream };
+    const newState: PreviewStateObject = { name: 'PreviewState', mediaStream: mediaStream };
     emit('setState', newState);
   })
   .catch((error: DOMException) => {
     const rejectionTime = Date.now() - selectionStartTime;
     // if request was rejected inhumanly fast, assmue it was blocked by browser and not blocked by user
     if (rejectionTime < 100) {
-      const newState: ErrorState = {
+      const newState: ErrorStateObject = {
         name: 'ErrorState',
         error: error,
         message: 'Your browser blocked the request to share your screen for recording. Unblock the screen share permission to record your screen.',
       };
       emit('setState', newState);
     } else {
-      const newState: ErrorState = {
+      const newState: ErrorStateObject = {
         name: 'ErrorState',
         error: error,
         message: 'You blocked the request to share your screen for recording. Unblock the screen share permission or refresh the page to try again.',

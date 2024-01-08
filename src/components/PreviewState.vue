@@ -3,14 +3,14 @@ import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
 import { computed, ref, watch } from 'vue';
-import type { PreviewState, AnyState, EmptyState, RecordingState } from '@/states';
+import type { PreviewStateObject, AnyStateObject, EmptyStateObject, RecordingStateObject } from '@/states';
 
 const props = defineProps<{
-  state: PreviewState;
+  state: PreviewStateObject;
 }>();
 
 const emit = defineEmits<{
-  setState: [state: AnyState];
+  setState: [state: AnyStateObject];
 }>();
 
 // monitor whether mediaStream tracks are active
@@ -29,7 +29,7 @@ watch(
   runningTracks,
   () => {
     if (runningTracks.value === 0) {
-      const newState: EmptyState = { name: 'EmptyState' };
+      const newState: EmptyStateObject = { name: 'EmptyState' };
       emit('setState', newState);
     }
   },
@@ -46,12 +46,12 @@ const stopSharing = () => {
   for (const track of props.state.mediaStream.getTracks()) {
     track.stop();
   }
-  const newState: EmptyState = { name: 'EmptyState' };
+  const newState: EmptyStateObject = { name: 'EmptyState' };
   emit('setState', newState);
 };
 
 const startRecording = () => {
-  const newState: RecordingState = { name: 'RecordingState', mediaStream: props.state.mediaStream };
+  const newState: RecordingStateObject = { name: 'RecordingState', mediaStream: props.state.mediaStream };
   emit('setState', newState);
 };
 

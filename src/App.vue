@@ -4,19 +4,33 @@ import EmptyState from './components/EmptyState.vue';
 import RecordingState from './components/RecordingState.vue';
 import PreviewState from './components/PreviewState.vue';
 import SelectionState from './components/SelectionState.vue';
+import EditState from './components/EditState.vue';
 import RecordingThumbnail from './components/RecordingThumbnail.vue';
-import type { AnyState, Recording } from './states';
+import type { AnyStateObject, EditStateObject, Recording } from './states';
 
-const state = ref<AnyState>({ name: 'EmptyState' });
+const state = ref<AnyStateObject>({ name: 'EmptyState' });
 
 const recordings = ref<Recording[]>([]);
 
-const setState = (newState: AnyState) => {
+const setState = (newState: AnyStateObject) => {
   state.value = newState;
 };
 
 const addRecording = (newRecording: Recording) => {
-  recordings.value.push(newRecording);
+  recordings.value.unshift(newRecording);
+};
+
+const deleteRecording = (recordingId: number) => {
+  recordings.value.splice(recordingId, 1);
+};
+
+const updateRecording = (recordingId: number, recording: Recording) => {
+  recordings.value.splice(recordingId, 1, recording);
+};
+
+const loadRecording = (recordingId: number) => {
+  const newState: EditStateObject = { name: 'EditState', recording: recordings.value[recordingId], recordingId: recordingId };
+  setState(newState);
 };
 
 </script>
@@ -46,12 +60,20 @@ const addRecording = (newRecording: Recording) => {
         @set-state="setState"
         @recording-complete="addRecording"
       />
+      <EditState
+        v-if="state.name === 'EditState'"
+        :state="state"
+        @set-state="setState"
+        @delete-recording="deleteRecording"
+        @update-recording="updateRecording"
+      />
     </div>
     <div class="side-column">
       <RecordingThumbnail
         v-for="recording, i of recordings"
         :key="i"
         :recording="recording"
+        @click="loadRecording(i)"
       />
     </div>
   </div>
