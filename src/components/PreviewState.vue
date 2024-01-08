@@ -84,13 +84,4 @@ const startRecording = () => {
 </template>
 
 <style>
-.preview-ui {
-  background-color: black;
-  display: flex;
-  justify-content: space-between;
-}
-
-.preview-ui > * {
-  flex-grow: 0;
-}
 </style>

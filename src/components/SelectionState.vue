@@ -68,24 +68,4 @@ const cancel = () => {
 </template>
 
 <style>
-.video-placeholder {
-  width: 100%;
-  padding-bottom: 60%;
-  background-color: black;
-}
-
-.preview-ui {
-  background-color: black;
-  display: flex;
-  justify-content: space-between;
-}
-
-.preview-ui > * {
-  flex-grow: 0;
-}
-
-.preview-ui-text {
-  color: white;
-  line-height: 1;
-}
 </style>
