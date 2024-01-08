@@ -25,9 +25,9 @@ const emit = defineEmits<{
 const videoElement = ref<HTMLVideoElement | null>(null);
 
 const startTime = Date.now();
+
 let streamLabel = 'Untitled shared source';
 const firstVideoTrack = props.state.mediaStream.getVideoTracks().pop();
-console.log(props.state.mediaStream.getTracks());
 if (firstVideoTrack !== undefined) {
   streamLabel = firstVideoTrack.label;
 }
@@ -82,6 +82,7 @@ const generateThumbnail = (videoElement: HTMLVideoElement, width = 200, height =
 
 const stopSharing = () => {
   mediaRecorder.stop();
+  // stopping the tracks notifies the browser that the screen is no longer being shared
   for (const track of props.state.mediaStream.getTracks()) {
     track.stop();
   }
@@ -91,19 +92,27 @@ const stopRecording = () => {
   mediaRecorder.stop();
 };
 
+// monitor whether mediaStream tracks are active
+// this is because the mediaStream can be stopped through the browser which isnt immediately visible to the app
 const runningTracks = ref(0);
 for (const track of props.state.mediaStream.getTracks()) {
-  runningTracks.value++;
-  track.addEventListener('ended', () => {
-    runningTracks.value--;
-  });
+  if (track.readyState === 'live') {
+    runningTracks.value++;
+    track.onended = () => {
+      runningTracks.value--;
+    };
+  }
 }
 
-watch(runningTracks, () => {
-  if (runningTracks.value === 0) {
-    stopSharing();
-  }
-});
+watch(
+  runningTracks,
+  () => {
+    if (runningTracks.value === 0) {
+      stopSharing();
+    }
+  },
+  { immediate: true },
+);
 
 </script>
 

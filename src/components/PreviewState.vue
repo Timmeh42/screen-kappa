@@ -2,7 +2,7 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { State, type PreviewState, type EmptyState, type RecordingState, type AnyState } from '../states';
 
 const props = defineProps<{
@@ -13,10 +13,28 @@ const emit = defineEmits<{
   setState: [state: AnyState];
 }>();
 
-if (props.state.mediaStream.getTracks().every((track) => track.readyState === 'ended')) {
-  const newState: EmptyState = { name: State.Empty };
-  emit('setState', newState);
+// monitor whether mediaStream tracks are active
+// this is because the mediaStream can be stopped through the browser which isnt immediately visible to the app
+const runningTracks = ref(0);
+for (const track of props.state.mediaStream.getTracks()) {
+  if (track.readyState === 'live') {
+    runningTracks.value++;
+    track.onended = () => {
+      runningTracks.value--;
+    };
+  }
 }
+
+watch(
+  runningTracks,
+  () => {
+    if (runningTracks.value === 0) {
+      const newState: EmptyState = { name: State.Empty };
+      emit('setState', newState);
+    }
+  },
+  { immediate: true },
+);
 
 const streamLabel = computed(() => {
   const videoTracks = props.state.mediaStream.getVideoTracks();
@@ -24,6 +42,7 @@ const streamLabel = computed(() => {
 });
 
 const stopSharing = () => {
+  // stopping the tracks notifies the browser that the screen is no longer being shared
   for (const track of props.state.mediaStream.getTracks()) {
     track.stop();
   }

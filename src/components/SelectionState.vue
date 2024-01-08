@@ -2,16 +2,17 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import { State, type AnyState, type ErrorState } from '../states';
+import { State, type AnyState, type ErrorState, type SelectionState } from '../states';
 
-// const props = defineProps<{
-//   state: SelectionState;
-// }>();
+defineProps<{
+  state: SelectionState;
+}>();
 
 const emit = defineEmits<{
   setState: [state: AnyState];
 }>();
 
+// record the time when we request a screen share
 const selectionStartTime = Date.now();
 
 navigator.mediaDevices
@@ -41,10 +42,11 @@ navigator.mediaDevices
       emit('setState', newState);
     }
   })
-  .catch((other: any) => console.log(other))
+  .catch((unknownError: any) => console.error(unknownError))
 ;
 
 const cancel = () => {
+  // there's no way to cancel a screen share request except by reloading the window
   window.location.reload();
 };
 </script>
