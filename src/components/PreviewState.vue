@@ -3,7 +3,7 @@ import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
 import { computed, ref, watch } from 'vue';
-import { State, type PreviewState, type EmptyState, type RecordingState, type AnyState } from '../states';
+import type { PreviewState, AnyState, EmptyState, RecordingState } from '@/states';
 
 const props = defineProps<{
   state: PreviewState;
@@ -29,7 +29,7 @@ watch(
   runningTracks,
   () => {
     if (runningTracks.value === 0) {
-      const newState: EmptyState = { name: State.Empty };
+      const newState: EmptyState = { name: 'EmptyState' };
       emit('setState', newState);
     }
   },
@@ -46,12 +46,12 @@ const stopSharing = () => {
   for (const track of props.state.mediaStream.getTracks()) {
     track.stop();
   }
-  const newState: EmptyState = { name: State.Empty };
+  const newState: EmptyState = { name: 'EmptyState' };
   emit('setState', newState);
 };
 
 const startRecording = () => {
-  const newState: RecordingState = { name: State.Recording, mediaStream: props.state.mediaStream };
+  const newState: RecordingState = { name: 'RecordingState', mediaStream: props.state.mediaStream };
   emit('setState', newState);
 };
 

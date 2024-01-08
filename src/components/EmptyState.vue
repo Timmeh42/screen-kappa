@@ -2,7 +2,7 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import { State, type AnyState, type SelectionState, type EmptyState, type ErrorState } from '../states';
+import type { EmptyState, ErrorState, AnyState, SelectionState } from '@/states';
 
 defineProps<{
   state: EmptyState | ErrorState;
@@ -13,7 +13,7 @@ const emit = defineEmits<{
 }>();
 
 const startSelection = () => {
-  const newState: SelectionState = { name: State.Selection };
+  const newState: SelectionState = { name: 'SelectionState' };
   emit('setState', newState);
 };
 
@@ -27,7 +27,7 @@ const startSelection = () => {
       </StreamUIText>
     </template>
     <template
-      v-if="state.name === State.Error"
+      v-if="state.name === 'ErrorState'"
       #video-overlay
     >
       {{ state.message }}

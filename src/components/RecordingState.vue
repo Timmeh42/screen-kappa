@@ -2,15 +2,8 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import { State, type AnyState, type RecordingState, type PreviewState } from '../states';
+import type { AnyState, Recording, PreviewState, RecordingState } from '@/states';
 import { ref, watch } from 'vue';
-
-type Recording = {
-  blob: Blob;
-  label: string;
-  created: number;
-  length: number;
-};
 
 const props = defineProps<{
   state: RecordingState;
@@ -50,7 +43,7 @@ mediaRecorder.onstop = () => {
     length: Date.now() - startTime,
   };
   emit('recordingComplete', recording);
-  const newState: PreviewState = { name: State.Preview, mediaStream: props.state.mediaStream };
+  const newState: PreviewState = { name: 'PreviewState', mediaStream: props.state.mediaStream };
   emit('setState', newState);
 };
 

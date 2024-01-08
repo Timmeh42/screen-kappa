@@ -1,12 +1,6 @@
 <script setup lang="ts">
+import type { Recording } from '@/states';
 import { computed, ref } from 'vue';
-
-type Recording = {
-  blob: Blob;
-  label: string;
-  created: number;
-  length: number;
-};
 
 const props = defineProps<{
   recording: Recording;
