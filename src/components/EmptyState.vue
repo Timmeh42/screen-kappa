@@ -1,32 +1,43 @@
 <script setup lang="ts">
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
-import { State } from '../states';
+import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import { State, type AnyState, type SelectionState, type EmptyState, type ErrorState } from '../states';
+
+defineProps<{
+  state: EmptyState | ErrorState;
+}>();
 
 const emit = defineEmits<{
-  setState: [state: State];
+  setState: [state: AnyState];
 }>();
 
 const startSelection = () => {
-  emit('setState', State.Selection);
+  const newState: SelectionState = { name: State.Selection };
+  emit('setState', newState);
 };
 
 </script>
 
 <template>
-  <div class="preview-container">
-    <div class="preview-ui">
+  <InterfaceLayout>
+    <template #header>
       <StreamUIText>
         No source shared
       </StreamUIText>
-    </div>
-    <div class="video-placeholder" />
-    <div class="preview-ui">
+    </template>
+    <template
+      v-if="state.name === State.Error"
+      #video-overlay
+    >
+      {{ state.message }}
+    </template>
+    <template #footer>
       <StreamUIButton @click="startSelection">
         Select/share source
       </StreamUIButton>
-    </div>
-  </div>
+    </template>
+  </InterfaceLayout>
 </template>
 
 <style>

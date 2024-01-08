@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
-import { State } from '../states';
+import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import { State, type AnyState, type ErrorState } from '../states';
+
+// const props = defineProps<{
+//   state: SelectionState;
+// }>();
 
 const emit = defineEmits<{
-  setState: [state: State];
-  setStream: [strean: MediaStream];
-  setError: [error: DOMException];
+  setState: [state: AnyState];
 }>();
+
+const selectionStartTime = Date.now();
 
 navigator.mediaDevices
   .getDisplayMedia({
@@ -15,14 +20,26 @@ navigator.mediaDevices
     audio: true,
   })
   .then((mediaStream) => {
-    emit('setStream', mediaStream);
-    emit('setState', State.Preview);
+    emit('setState', { name: State.Preview, mediaStream: mediaStream });
   })
   .catch((error: DOMException) => {
-    // rejected or some other error
-    console.log(error);
-    emit('setError', error);
-    emit('setState', State.Error);
+    const rejectionTime = Date.now() - selectionStartTime;
+    // if request was rejected inhumanly fast, assmue it was blocked by browser and not blocked by user
+    if (rejectionTime < 100) {
+      const newState: ErrorState = {
+        name: State.Error,
+        error: error,
+        message: 'Your browser blocked the request to share your screen for recording. Unblock the screen share permission to record your screen.',
+      };
+      emit('setState', newState);
+    } else {
+      const newState: ErrorState = {
+        name: State.Error,
+        error: error,
+        message: 'You blocked the request to share your screen for recording. Unblock the screen share permission or refresh the page to try again.',
+      };
+      emit('setState', newState);
+    }
   })
   .catch((other: any) => console.log(other))
 ;
@@ -33,19 +50,18 @@ const cancel = () => {
 </script>
 
 <template>
-  <div class="preview-container">
-    <div class="preview-ui">
+  <InterfaceLayout>
+    <template #header>
       <StreamUIText>
         Waiting for source...
       </StreamUIText>
-    </div>
-    <div class="video-placeholder" />
-    <div class="preview-ui">
+    </template>
+    <template #footer>
       <StreamUIButton @click="cancel">
         Cancel share request
       </StreamUIButton>
-    </div>
-  </div>
+    </template>
+  </InterfaceLayout>
 </template>
 
 <style>

@@ -1,71 +1,67 @@
 <script setup lang="ts">
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
-import { ref, computed, watch } from 'vue';
-import { State } from '../states';
+import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import { computed } from 'vue';
+import { State, type PreviewState, type EmptyState, type RecordingState, type AnyState } from '../states';
 
 const props = defineProps<{
-  stream: MediaStream;
+  state: PreviewState;
 }>();
 
 const emit = defineEmits<{
-  setState: [state: State];
-  setStream: [strean: MediaStream | null];
+  setState: [state: AnyState];
 }>();
 
+if (props.state.mediaStream.getTracks().every((track) => track.readyState === 'ended')) {
+  const newState: EmptyState = { name: State.Empty };
+  emit('setState', newState);
+}
+
 const streamLabel = computed(() => {
-  const videoTracks = props.stream.getVideoTracks();
+  const videoTracks = props.state.mediaStream.getVideoTracks();
   return videoTracks.pop()?.label;
 });
 
-const runningTracks = ref(0);
-for (const track of props.stream.getTracks()) {
-  runningTracks.value++;
-  track.addEventListener('ended', () => {
-    runningTracks.value--;
-  });
-  console.log(track, runningTracks.value);
-}
-
-watch(runningTracks, () => {
-  console.log(runningTracks.value);
-  if (runningTracks.value === 0) {
-    stopSharing();
-  }
-});
-
 const stopSharing = () => {
-  emit('setStream', null);
-  emit('setState', State.Empty);
+  for (const track of props.state.mediaStream.getTracks()) {
+    track.stop();
+  }
+  const newState: EmptyState = { name: State.Empty };
+  emit('setState', newState);
 };
 
 const startRecording = () => {
-  emit('setState', State.Recording);
+  const newState: RecordingState = { name: State.Recording, mediaStream: props.state.mediaStream };
+  emit('setState', newState);
 };
 
 </script>
 
 <template>
-  <div class="preview-container">
-    <div class="preview-ui">
+  <InterfaceLayout>
+    <template #header>
       <StreamUIText>
         {{ streamLabel ?? 'Untitled shared source' }}
       </StreamUIText>
-    </div>
-    <video
-      autoplay
-      muted
-      :srcObject="stream"
-    />
-    <div class="preview-ui">
+    </template>
+    <template #video>
+      <video
+        autoplay
+        muted
+        disablepictureinpicture
+        :srcObject="props.state.mediaStream"
+      />
+    </template>
+    <template #footer>
       <StreamUIButton @click="stopSharing">
         Stop sharing source
       </StreamUIButton>
       <StreamUIButton @click="startRecording">
         Start recording
       </StreamUIButton>
-    </div>
-  </div>
+    </template>
+  </InterfaceLayout>
 </template>
 
 <style>

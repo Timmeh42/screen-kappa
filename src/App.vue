@@ -1,66 +1,65 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import EmptyState from './components/EmptyState.vue';
 import RecordingState from './components/RecordingState.vue';
 import PreviewState from './components/PreviewState.vue';
-import ErrorState from './components/ErrorState.vue';
-import { State } from './states';
+import { State, type AnyState } from './states';
 import SelectionState from './components/SelectionState.vue';
+import RecordingThumbnail from './components/RecordingThumbnail.vue';
 
-const state = ref<State>(State.Empty);
-const error = ref<DOMException | null>(null);
-const mediaStream = ref<MediaStream | null>(null);
+type Recording = {
+  blob: Blob;
+  label: string;
+  created: number;
+  length: number;
+  thumbnail: string;
+};
 
-watch(mediaStream, (newMediaStream, oldMediaStream) => {
-  if (newMediaStream === null && oldMediaStream !== null) {
-    for (const track of oldMediaStream.getTracks()) {
-      track.stop();
-    }
-  }
-});
+const state = ref<AnyState>({ name: State.Empty });
 
-const setState = (newState: State) => {
+const recordings = ref<Recording[]>([]);
+
+const setState = (newState: AnyState) => {
   state.value = newState;
 };
 
-const setStream = (stream: MediaStream | null) => {
-  mediaStream.value = stream;
-};
-
-const setError = (newError: DOMException | null) => {
-  error.value = newError;
+const addRecording = (newRecording: Recording) => {
+  recordings.value.push(newRecording);
 };
 
 </script>
 
 <template>
   <div class="container">
-    <div class="center-column">
+    <div class="side-column" />
+    <div class="main-column">
       <EmptyState
-        v-if="state === State.Empty"
+        v-if="state.name === State.Empty || state.name === State.Error"
+        :state="state"
         @set-state="setState"
       />
       <SelectionState
-        v-if="state === State.Selection"
+        v-if="state.name === State.Selection"
+        :state="state"
         @set-state="setState"
-        @set-stream="setStream"
-        @set-error="setError"
       />
       <PreviewState
-        v-if="state === State.Preview"
-        :stream="mediaStream"
+        v-if="state.name === State.Preview"
+        :state="state"
         @set-state="setState"
-        @set-stream="setStream"
       />
       <RecordingState
-        v-if="state === State.Recording"
-        :stream="mediaStream"
+        v-if="state.name === State.Recording"
+        :state="state"
         @set-state="setState"
-        @set-stream="setStream"
+        @recording-complete="addRecording"
       />
-      <ErrorState
-        v-if="state === State.Error"
-        :error="error"
+    </div>
+    <div class="side-column">
+      <RecordingThumbnail
+        v-for="recording, i of recordings"
+        :key="i"
+        :recording="recording"
       />
     </div>
   </div>
@@ -69,12 +68,19 @@ const setError = (newError: DOMException | null) => {
 <style scoped>
 .container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  align-content: stretch;
+  padding-top: 40px;
 }
 
-.center-column {
-  padding-top: 40px;
+.main-column {
   width: 400px;
+  flex-grow: 0;
+}
+
+.side-column {
+  width: 200px;
+  flex-grow: 0;
 }
 </style>

@@ -1,62 +1,105 @@
 <script setup lang="ts">
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
-import { State } from '../states';
-import { ref, computed, watch } from 'vue';
+import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import { State, type AnyState, type RecordingState, type PreviewState } from '../states';
+import { ref, watch } from 'vue';
+
+type Recording = {
+  blob: Blob;
+  label: string;
+  created: number;
+  length: number;
+  thumbnail: string;
+};
 
 const props = defineProps<{
-  stream: MediaStream;
+  state: RecordingState;
 }>();
 
 const emit = defineEmits<{
-  setState: [state: State];
-  setStream: [strean: MediaStream | null];
+  setState: [state: AnyState];
+  recordingComplete: [recording: Recording];
 }>();
 
-const videoTracks = props.stream.getVideoTracks();
-const streamLabel = videoTracks.pop()?.label;
+const videoElement = ref<HTMLVideoElement | null>(null);
+
+const startTime = Date.now();
+let streamLabel = 'Untitled shared source';
+const firstVideoTrack = props.state.mediaStream.getVideoTracks().pop();
+console.log(props.state.mediaStream.getTracks());
+if (firstVideoTrack !== undefined) {
+  streamLabel = firstVideoTrack.label;
+}
+let thumbnail = '';
 
 const recordedChunks: Blob[] = [];
-const mediaRecorder = new MediaRecorder(props.stream, {
+const mediaRecorder = new MediaRecorder(props.state.mediaStream, {
   mimeType: 'video/webm;codecs=vp8',
 });
 
 mediaRecorder.start();
 mediaRecorder.ondataavailable = (blobEvent) => {
   recordedChunks.push(blobEvent.data);
+  if (videoElement.value !== null) {
+    thumbnail = generateThumbnail(videoElement.value);
+  }
 };
 
 mediaRecorder.onstop = () => {
   const videoBlob = new Blob(recordedChunks, { type: 'video/webm;codecs=vp8' });
-  const a = document.createElement('a');
-  const videoURL = URL.createObjectURL(videoBlob);
-  a.href = videoURL;
-  a.download = `${streamLabel} recording ${new Date().toISOString()}.webm`;
-  a.click();
+  const recording: Recording = {
+    blob: videoBlob,
+    label: streamLabel,
+    created: Date.now(),
+    length: Date.now() - startTime,
+    thumbnail,
+  };
+  emit('recordingComplete', recording);
+  const newState: PreviewState = { name: State.Preview, mediaStream: props.state.mediaStream };
+  emit('setState', newState);
+};
+
+const generateThumbnail = (videoElement: HTMLVideoElement, width = 200, height = 150): string => {
+  const canvasElement = document.createElement('canvas');
+  canvasElement.width = width;
+  canvasElement.height = height;
+  const videoWidth = videoElement.videoWidth;
+  const videoHeight = videoElement.videoHeight;
+  const ratio = Math.min(width / videoWidth, height / videoHeight);
+  const drawWidth = ratio * videoWidth;
+  const drawHeight = ratio * videoHeight;
+  const offsetX = (width - drawWidth) / 2;
+  const offsetY = (height - drawHeight) / 2;
+  const drawContext = canvasElement.getContext('2d') as CanvasRenderingContext2D;
+  if (drawContext !== null) {
+    drawContext.fillStyle = 'black';
+    drawContext.fillRect(0, 0, width, height);
+    drawContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight, offsetX, offsetY, drawWidth, drawHeight);
+  }
+  return canvasElement.toDataURL();
 };
 
 const stopSharing = () => {
   mediaRecorder.stop();
-  emit('setStream', null);
-  emit('setState', State.Empty);
+  for (const track of props.state.mediaStream.getTracks()) {
+    track.stop();
+  }
 };
 
 const stopRecording = () => {
   mediaRecorder.stop();
-  emit('setState', State.Preview);
 };
 
 const runningTracks = ref(0);
-for (const track of props.stream.getTracks()) {
+for (const track of props.state.mediaStream.getTracks()) {
   runningTracks.value++;
   track.addEventListener('ended', () => {
     runningTracks.value--;
   });
-  console.log(track, runningTracks.value);
 }
 
 watch(runningTracks, () => {
-  console.log(runningTracks.value);
   if (runningTracks.value === 0) {
     stopSharing();
   }
@@ -65,10 +108,10 @@ watch(runningTracks, () => {
 </script>
 
 <template>
-  <div class="preview-container">
-    <div class="preview-ui">
+  <InterfaceLayout>
+    <template #header>
       <StreamUIText>
-        {{ streamLabel ?? 'Untitled shared source' }}
+        {{ streamLabel }}
       </StreamUIText>
       <StreamUIText
         highlight
@@ -76,36 +119,23 @@ watch(runningTracks, () => {
       >
         REC
       </StreamUIText>
-    </div>
-    <video
-      autoplay
-      muted
-      :srcObject="props.stream"
-    />
-    <div class="preview-ui">
+    </template>
+    <template #video>
+      <video
+        ref="videoElement"
+        autoplay
+        muted
+        disablepictureinpicture
+        :srcObject="props.state.mediaStream"
+      />
+    </template>
+    <template #footer>
       <StreamUIButton @click="stopSharing">
         Stop sharing source
       </StreamUIButton>
       <StreamUIButton @click="stopRecording">
         Stop recording
       </StreamUIButton>
-    </div>
-  </div>
+    </template>
+  </InterfaceLayout>
 </template>
-
-<style>
-.preview-ui {
-  background-color: black;
-  display: flex;
-  justify-content: space-between;
-}
-
-.preview-ui > * {
-  flex-grow: 0;
-}
-
-.preview-ui-text {
-  color: white;
-  line-height: 1;
-}
-</style>
