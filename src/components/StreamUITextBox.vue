@@ -2,8 +2,6 @@
 import { ref } from 'vue';
 const props = defineProps<{
   modelValue: string;
-  highlight?: boolean;
-  noshrink?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -14,28 +12,30 @@ const inputElement = ref<HTMLInputElement>();
 
 const input = () => {
   if (inputElement.value) {
-    emit('update:modelValue', inputElement.value.value);
+    emit('update:modelValue', inputElement.value.innerText);
   }
 };
 
 </script>
 
 <template>
-  <input
+  <span
     ref="inputElement"
-    type="text"
+    contenteditable
     autofocus
-    :value="props.modelValue"
     class="preview-ui-textbox"
     @input="input"
   >
+    {{ props.modelValue }}
+  </span>
 </template>
 
 <style lang="scss">
 .preview-ui-textbox {
-  margin: 4px;
-  padding: 4px 5px;
+  padding: 0.5rem 0.75rem;
   line-height: 1;
   white-space: nowrap;
+  border: 1px solid transparent;
+  background-color: white;
 }
 </style>

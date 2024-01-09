@@ -61,7 +61,7 @@ const cancel = () => {
     </template>
     <template #footer>
       <StreamUIButton @click="cancel">
-        Cancel share request
+        🙅 Cancel share request
       </StreamUIButton>
     </template>
   </InterfaceLayout>

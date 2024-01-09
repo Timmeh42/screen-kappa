@@ -1,37 +1,26 @@
 <script setup lang="ts">
-const props = defineProps<{
-  highlight?: boolean;
-  noshrink?: boolean;
-}>();
 </script>
 
 <template>
-  <button
-    class="preview-ui-button"
-    :class="[
-      props.noshrink ? 'preview-ui-button-noshrink' : '',
-    ]"
-  >
-    <slot />
+  <button class="preview-ui-button">
+    <span class="preview-ui-button-content">
+      <slot />
+    </span>
   </button>
 </template>
 
 <style lang="scss">
 .preview-ui-button {
-  margin: 4px;
-  padding: 5px 6px 4px;
+  padding: 0.5rem 0.75rem;
   color: black;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-radius: 8px;
+  border-radius: 999rem;
   border: 1px solid white;
   background-color: white;
-
-  &-noshrink {
-    flex-shrink: 0;
-  }
+  flex-shrink: 0;
 
   &:hover, &:focus {
     background-color: #d1d1d1;
@@ -40,6 +29,10 @@ const props = defineProps<{
   &:active {
     background-color: #a0a0a0;
   }
+}
+
+.preview-ui-button-content {
+  vertical-align: middle;
 }
 
 </style>

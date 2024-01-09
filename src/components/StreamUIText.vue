@@ -19,17 +19,17 @@ const props = defineProps<{
 
 <style lang="scss">
 .preview-ui-text {
-  margin: 4px;
-  padding: 4px 5px;
+  padding: 0.5rem 0.75rem;
   color: white;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border: 1px solid transparent;
 
   &-highlight {
-    border-radius: 6px;
-    border: 1px solid white;
+    border-radius: 0.5rem;
+    border-color: white;
   }
 
   &-noshrink {

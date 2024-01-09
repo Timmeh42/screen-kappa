@@ -50,8 +50,8 @@ const saveDownload = () => {
       <StreamUITextBox
         v-model="clonedRecording.label"
       />
-      <StreamUIButton @click="doneEditing">
-        Done
+      <StreamUIButton @click="saveDownload">
+        📥 Save to file
       </StreamUIButton>
     </template>
     <template #video>
@@ -62,30 +62,15 @@ const saveDownload = () => {
       />
     </template>
     <template #footer>
-      <StreamUIButton @click="saveDownload">
-        Save to file
-      </StreamUIButton>
       <StreamUIButton @click="deleteRecording">
-        Delete
+        ❌ Delete
+      </StreamUIButton>
+      <StreamUIButton @click="doneEditing">
+        👍 Done
       </StreamUIButton>
     </template>
   </InterfaceLayout>
 </template>
 
 <style>
-.video-placeholder {
-  width: 100%;
-  padding-bottom: 60%;
-  background-color: black;
-}
-
-.preview-ui {
-  background-color: black;
-  display: flex;
-  justify-content: space-between;
-}
-
-.preview-ui > * {
-  flex-grow: 0;
-}
 </style>

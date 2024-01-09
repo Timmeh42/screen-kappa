@@ -1,12 +1,22 @@
+<script setup lang="ts">
+defineProps<{
+  frameColor?: string;
+}>();
+</script>
+
 <template>
-  <div class="preview-container">
+  <div
+    class="preview-container"
+    :style="`--frame-color: ${frameColor ?? 'black'};`"
+  >
     <div class="preview-ui">
       <slot name="header" />
     </div>
     <div class="preview-video">
-      <slot name="video">
-        <div class="video-placeholder" />
-      </slot>
+      <div class="video-placeholder" />
+      <div class="video-container">
+        <slot name="video" />
+      </div>
       <div class="video-overlay">
         <div class="video-overlay-content">
           <slot name="video-overlay" />
@@ -19,11 +29,13 @@
   </div>
 </template>
 
-<style>
+<style lang="scss">
 .preview-ui {
-  background-color: black;
+  padding: 0.5rem;
+  background-color: var(--frame-color);
   display: flex;
   justify-content: space-between;
+  gap: 0.25rem;
 }
 
 .preview-ui > * {
@@ -32,14 +44,26 @@
 
 .preview-video {
   position: relative;
-  border: 1px solid black;
-  border-width: 0 1px;
+  border: 2px solid var(--frame-color);
+  border-width: 0 2px;
 }
 
 .video-placeholder {
   width: 100%;
   padding-bottom: 60%;
-  background-color: black;
+  background-color: var(--frame-color);
+}
+
+.video-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+
+  & > video {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .video-overlay {
@@ -56,7 +80,7 @@
   text-align: center;
   color: white;
   background-color: rgba(100, 100, 100, 0.7);
-  padding: 8px;
+  padding: 0.5rem;
   pointer-events: all;
 }
 </style>

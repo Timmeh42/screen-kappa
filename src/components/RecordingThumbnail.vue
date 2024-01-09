@@ -40,9 +40,11 @@ const mouseLeave = () => {
 
 <template>
   <div class="thumbnail-container">
+    <div class="thumbnail-filler" />
     <video
       ref="videoElement"
-      disablepictureinpicture
+      class="thumbnail-video"
+      disablePictureInPicture
       :src="videoSource"
       @mouseover="mouseOver"
       @mouseleave="mouseLeave"
@@ -54,8 +56,27 @@ const mouseLeave = () => {
 
 <style lang="scss">
 .thumbnail-container {
-  margin: 16px;
+  margin: 0 1rem 1rem;
   position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid black;
+
+  &:hover {
+    border-color: red;
+  }
+}
+
+.thumbnail-video {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+}
+
+.thumbnail-filler {
+  padding-bottom: 60%;
+  background-color: black;
 }
 
 .thumbnail-ui {

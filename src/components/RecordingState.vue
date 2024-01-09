@@ -18,15 +18,29 @@ const videoElement = ref<HTMLVideoElement | null>(null);
 
 const startTime = Date.now();
 
-let streamLabel = 'Untitled shared source';
+let streamLabel = 'Untitled recording';
 const firstVideoTrack = props.state.mediaStream.getVideoTracks().pop();
 if (firstVideoTrack !== undefined) {
-  streamLabel = firstVideoTrack.label;
+  streamLabel = `${firstVideoTrack.label} recording`;
+}
+
+const audioTracks = props.state.mediaStream.getAudioTracks();
+if (audioTracks.length > 1) {
+  const audioContext = new AudioContext();
+  const combinedAudio = audioContext.createMediaStreamDestination();
+  for (const audioTrack of audioTracks) {
+    const audioTrackStream = new MediaStream();
+    audioTrackStream.addTrack(audioTrack);
+    audioContext.createMediaStreamSource(audioTrackStream).connect(combinedAudio);
+    props.state.mediaStream.removeTrack(audioTrack);
+  }
+  const combinedAudioTrack = combinedAudio.stream.getAudioTracks()[0];
+  props.state.mediaStream.addTrack(combinedAudioTrack);
 }
 
 const recordedChunks: Blob[] = [];
 const mediaRecorder = new MediaRecorder(props.state.mediaStream, {
-  mimeType: 'video/webm;codecs=vp8',
+  mimeType: 'video/webm',
 });
 
 mediaRecorder.start();
@@ -88,7 +102,7 @@ watch(
 </script>
 
 <template>
-  <InterfaceLayout>
+  <InterfaceLayout frame-color="#880000">
     <template #header>
       <StreamUIText>
         {{ streamLabel }}
@@ -105,16 +119,16 @@ watch(
         ref="videoElement"
         autoplay
         muted
-        disablepictureinpicture
+        disablePictureInPicture
         :srcObject="props.state.mediaStream"
       />
     </template>
     <template #footer>
       <StreamUIButton @click="stopSharing">
-        Stop sharing source
+        🚫 Stop sharing source
       </StreamUIButton>
       <StreamUIButton @click="stopRecording">
-        Stop recording
+        ✋ Stop recording
       </StreamUIButton>
     </template>
   </InterfaceLayout>

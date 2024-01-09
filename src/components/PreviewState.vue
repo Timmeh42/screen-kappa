@@ -4,6 +4,8 @@ import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
 import { computed, ref, watch } from 'vue';
 import type { PreviewStateObject, AnyStateObject, EmptyStateObject, RecordingStateObject } from '@/states';
+import MetaText from './MetaText.vue';
+import StreamUIToggle from './StreamUIToggle.vue';
 
 const props = defineProps<{
   state: PreviewStateObject;
@@ -55,6 +57,32 @@ const startRecording = () => {
   emit('setState', newState);
 };
 
+const useMic = ref(false);
+const micTrack = ref<MediaStreamTrack>();
+watch(useMic, (newValue, oldValue) => {
+  if (newValue === true && oldValue === false) {
+    navigator.mediaDevices
+      .getUserMedia({ video: false, audio: true })
+      .then((microphoneStream: MediaStream) => {
+        micTrack.value = microphoneStream.getAudioTracks()[0];
+        const audioTracks = microphoneStream.getAudioTracks();
+        for (const audioTrack of audioTracks) {
+          props.state.mediaStream.addTrack(audioTrack);
+        }
+      })
+      .catch(() => {
+        useMic.value = false;
+      });
+  }
+  if (newValue === false && oldValue === true) {
+    for (const audioTrack of props.state.mediaStream.getAudioTracks()) {
+      if (audioTrack.id === micTrack.value?.id) {
+        props.state.mediaStream.removeTrack(audioTrack);
+      }
+    }
+  }
+});
+
 </script>
 
 <template>
@@ -68,19 +96,33 @@ const startRecording = () => {
       <video
         autoplay
         muted
-        disablepictureinpicture
+        disablePictureInPicture
         :srcObject="props.state.mediaStream"
       />
     </template>
     <template #footer>
       <StreamUIButton @click="stopSharing">
-        Stop sharing source
+        🚫 Stop sharing source
       </StreamUIButton>
+      <StreamUIToggle
+        v-model="useMic"
+        :labels="['no', 'yes']"
+      >
+        Record microphone?
+      </StreamUIToggle>
       <StreamUIButton @click="startRecording">
-        Start recording
+        🎬 Start recording
       </StreamUIButton>
     </template>
   </InterfaceLayout>
+  <MetaText>
+    <p>
+      Now you can preview what you are sharing, before recording.
+    </p>
+    <p>
+      To start, press the [Select/share source] button to choose a window or screen to record from, just like sharing your screen on a video call.
+    </p>
+  </MetaText>
 </template>
 
 <style>

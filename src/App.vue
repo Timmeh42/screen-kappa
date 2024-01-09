@@ -81,20 +81,23 @@ const loadRecording = (recordingId: number) => {
 
 <style scoped>
 .container {
+  width: 100%;
+  max-width: 1400px;
+  margin: auto;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-content: stretch;
-  padding-top: 40px;
+  padding-top: 2.5rem;
 }
 
 .main-column {
-  width: 400px;
+  width: 60%;
   flex-grow: 0;
 }
 
 .side-column {
-  width: 200px;
+  width: 20%;
   flex-grow: 0;
 }
 </style>
