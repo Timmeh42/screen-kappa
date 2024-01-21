@@ -3,7 +3,7 @@ import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
 import type { AnyStateObject, Recording, RecordingStateObject, EditStateObject } from '@/states';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
   state: RecordingStateObject;
@@ -16,48 +16,54 @@ const emit = defineEmits<{
 
 const videoElement = ref<HTMLVideoElement | null>(null);
 
-const startTime = Date.now();
-
 let streamLabel = 'Untitled recording';
-const firstVideoTrack = props.state.mediaStream.getVideoTracks().pop();
+let videoMonitorStream: MediaStream;
+const firstVideoTrack = props.state.videoTracks[0];
 if (firstVideoTrack !== undefined) {
   streamLabel = `${firstVideoTrack.label} recording`;
+  videoMonitorStream = new MediaStream([firstVideoTrack]);
 }
 
-const audioTracks = props.state.mediaStream.getAudioTracks();
-if (audioTracks.length > 1) {
-  const audioContext = new AudioContext();
-  const combinedAudio = audioContext.createMediaStreamDestination();
-  for (const audioTrack of audioTracks) {
-    const audioTrackStream = new MediaStream();
-    audioTrackStream.addTrack(audioTrack);
-    audioContext.createMediaStreamSource(audioTrackStream).connect(combinedAudio);
-    props.state.mediaStream.removeTrack(audioTrack);
-  }
-  const combinedAudioTrack = combinedAudio.stream.getAudioTracks()[0];
-  props.state.mediaStream.addTrack(combinedAudioTrack);
+// combine audio tracks, as chrome cant record multiple at once
+const audioContext = new AudioContext();
+const combinedAudio = audioContext.createMediaStreamDestination();
+for (const audioTrack of props.state.audioTracks) {
+  const audioTrackStream = new MediaStream();
+  audioTrackStream.addTrack(audioTrack);
+  audioContext
+    .createMediaStreamSource(audioTrackStream)
+    .connect(combinedAudio)
+  ;
 }
+const recordingStream = new MediaStream([
+  ...props.state.videoTracks,
+  ...combinedAudio.stream.getAudioTracks(),
+]);
 
-const recordedChunks: Blob[] = [];
-const mediaRecorder = new MediaRecorder(props.state.mediaStream, {
+const mediaRecorder = new MediaRecorder(recordingStream, {
   mimeType: 'video/webm',
 });
 
+const startTime = Date.now();
 mediaRecorder.start();
+
+const recordedChunks: Blob[] = [];
 mediaRecorder.ondataavailable = (blobEvent) => {
   recordedChunks.push(blobEvent.data);
 };
 
 mediaRecorder.onstop = () => {
   const videoBlob = new Blob(recordedChunks, { type: 'video/webm;codecs=vp8' });
+
+  const stopTime = Date.now();
   const recording: Recording = {
     blob: videoBlob,
     label: streamLabel,
-    created: Date.now(),
-    length: Date.now() - startTime,
+    created: stopTime,
+    length: stopTime - startTime,
   };
   // stopping the tracks notifies the browser that the screen is no longer being shared
-  for (const track of props.state.mediaStream.getTracks()) {
+  for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
     track.stop();
   }
   emit('recordingComplete', recording);
@@ -68,7 +74,7 @@ mediaRecorder.onstop = () => {
 const stopSharing = () => {
   mediaRecorder.stop();
   // stopping the tracks notifies the browser that the screen is no longer being shared
-  for (const track of props.state.mediaStream.getTracks()) {
+  for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
     track.stop();
   }
 };
@@ -79,26 +85,18 @@ const stopRecording = () => {
 
 // monitor whether mediaStream tracks are active
 // this is because the mediaStream can be stopped through the browser which isnt immediately visible to the app
-const runningTracks = ref(0);
-for (const track of props.state.mediaStream.getTracks()) {
-  if (track.readyState === 'live') {
-    runningTracks.value++;
-    track.onended = () => {
-      runningTracks.value--;
-    };
+
+const checkTracksLiveness = () => {
+  const allTracks = [...props.state.videoTracks, ...props.state.audioTracks];
+  const allEnded = allTracks.every((track) => track.readyState === 'ended');
+  if (allEnded === true) {
+    stopSharing();
   }
+};
+
+for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
+  track.onended = checkTracksLiveness;
 }
-
-watch(
-  runningTracks,
-  () => {
-    if (runningTracks.value === 0) {
-      stopSharing();
-    }
-  },
-  { immediate: true },
-);
-
 </script>
 
 <template>
@@ -120,7 +118,7 @@ watch(
         autoplay
         muted
         disablePictureInPicture
-        :srcObject="props.state.mediaStream"
+        :srcObject="videoMonitorStream"
       />
     </template>
     <template #footer>

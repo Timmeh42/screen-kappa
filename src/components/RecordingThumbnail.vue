@@ -14,9 +14,13 @@ const videoSource = computed(() => URL.createObjectURL(props.recording.blob));
 
 const lengthDisplay = computed(() => {
   const dateObject = new Date(props.recording.length);
-  const minutes = dateObject.getMinutes();
-  const seconds = dateObject.getSeconds();
-  return `${minutes}:${(seconds < 10 ? '0' : '') + seconds}`;
+  const minutes = dateObject.getMinutes().toString();
+  const seconds = dateObject
+    .getSeconds()
+    .toString()
+    .padStart(2, '0')
+  ;
+  return `${minutes}:${seconds}`;
 });
 
 const mouseOver = () => {

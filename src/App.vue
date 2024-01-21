@@ -10,6 +10,15 @@ import type { AnyStateObject, EditStateObject, Recording } from './states';
 
 const state = ref<AnyStateObject>({ name: 'EmptyState' });
 
+const stateComponents = {
+  EmptyState,
+  RecordingState,
+  PreviewState,
+  SelectionState,
+  EditState,
+  ErrorState: EmptyState,
+};
+
 const recordings = ref<Recording[]>([]);
 
 const setState = (newState: AnyStateObject) => {
@@ -39,33 +48,13 @@ const loadRecording = (recordingId: number) => {
   <div class="container">
     <div class="side-column" />
     <div class="main-column">
-      <EmptyState
-        v-if="state.name === 'EmptyState' || state.name === 'ErrorState'"
-        :state="state"
-        @set-state="setState"
-      />
-      <SelectionState
-        v-if="state.name === 'SelectionState'"
-        :state="state"
-        @set-state="setState"
-      />
-      <PreviewState
-        v-if="state.name === 'PreviewState'"
-        :state="state"
-        @set-state="setState"
-      />
-      <RecordingState
-        v-if="state.name === 'RecordingState'"
-        :state="state"
-        @set-state="setState"
-        @recording-complete="addRecording"
-      />
-      <EditState
-        v-if="state.name === 'EditState'"
+      <component
+        :is="stateComponents[state.name]"
         :state="state"
         @set-state="setState"
         @delete-recording="deleteRecording"
         @update-recording="updateRecording"
+        @recording-complete="addRecording"
       />
     </div>
     <div class="side-column">

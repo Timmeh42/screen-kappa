@@ -1,13 +1,15 @@
 <script setup lang="ts">
-defineProps<{
-  frameColor?: string;
-}>();
+withDefaults(defineProps<{
+  frameColor: string;
+}>(), {
+  frameColor: 'black',
+});
 </script>
 
 <template>
   <div
     class="preview-container"
-    :style="`--frame-color: ${frameColor ?? 'black'};`"
+    :style="`--frame-color: ${frameColor};`"
   >
     <div class="preview-ui">
       <slot name="header" />

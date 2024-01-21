@@ -2,7 +2,7 @@
 import StreamUIText from './StreamUIText.vue';
 import StreamUIButton from './StreamUIButton.vue';
 import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import type { PreviewStateObject, AnyStateObject, EmptyStateObject, RecordingStateObject } from '@/states';
 import MetaText from './MetaText.vue';
 import StreamUIToggle from './StreamUIToggle.vue';
@@ -15,10 +15,10 @@ const emit = defineEmits<{
   setState: [state: AnyStateObject];
 }>();
 
-// monitor whether mediaStream tracks are active
-// this is because the mediaStream can be stopped through the browser which isnt immediately visible to the app
+// monitor whether media tracks are active
+// this is because the tracks can be stopped through the browser which isnt immediately visible to the app
 const runningTracks = ref(0);
-for (const track of props.state.mediaStream.getTracks()) {
+for (const track of [...props.state.audioTracks, ...props.state.videoTracks]) {
   if (track.readyState === 'live') {
     runningTracks.value++;
     track.onended = () => {
@@ -38,14 +38,17 @@ watch(
   { immediate: true },
 );
 
-const streamLabel = computed(() => {
-  const videoTracks = props.state.mediaStream.getVideoTracks();
-  return videoTracks.pop()?.label;
-});
+let streamLabel = 'Untitled recording';
+let videoMonitorStream: MediaStream;
+const firstVideoTrack = props.state.videoTracks[0];
+if (firstVideoTrack !== undefined) {
+  streamLabel = `${firstVideoTrack.label} recording`;
+  videoMonitorStream = new MediaStream([firstVideoTrack]);
+}
 
 const stopSharing = () => {
   // stopping the tracks notifies the browser that the screen is no longer being shared
-  for (const track of props.state.mediaStream.getTracks()) {
+  for (const track of [...props.state.audioTracks, ...props.state.videoTracks]) {
     track.stop();
   }
   const newState: EmptyStateObject = { name: 'EmptyState' };
@@ -53,7 +56,15 @@ const stopSharing = () => {
 };
 
 const startRecording = () => {
-  const newState: RecordingStateObject = { name: 'RecordingState', mediaStream: props.state.mediaStream };
+  const recordingAudioTracks = [...props.state.audioTracks];
+  if (useMic.value === true && micTrack.value !== undefined) {
+    recordingAudioTracks.push(micTrack.value);
+  }
+  const newState: RecordingStateObject = {
+    name: 'RecordingState',
+    videoTracks: props.state.videoTracks,
+    audioTracks: recordingAudioTracks,
+  };
   emit('setState', newState);
 };
 
@@ -64,22 +75,13 @@ watch(useMic, (newValue, oldValue) => {
     navigator.mediaDevices
       .getUserMedia({ video: false, audio: true })
       .then((microphoneStream: MediaStream) => {
-        micTrack.value = microphoneStream.getAudioTracks()[0];
         const audioTracks = microphoneStream.getAudioTracks();
-        for (const audioTrack of audioTracks) {
-          props.state.mediaStream.addTrack(audioTrack);
-        }
+        micTrack.value = audioTracks[0];
       })
       .catch(() => {
+        micTrack.value = undefined;
         useMic.value = false;
       });
-  }
-  if (newValue === false && oldValue === true) {
-    for (const audioTrack of props.state.mediaStream.getAudioTracks()) {
-      if (audioTrack.id === micTrack.value?.id) {
-        props.state.mediaStream.removeTrack(audioTrack);
-      }
-    }
   }
 });
 
@@ -97,7 +99,7 @@ watch(useMic, (newValue, oldValue) => {
         autoplay
         muted
         disablePictureInPicture
-        :srcObject="props.state.mediaStream"
+        :srcObject="videoMonitorStream"
       />
     </template>
     <template #footer>

@@ -8,12 +8,14 @@ export type SelectionStateObject = {
 
 export type PreviewStateObject = {
   name: 'PreviewState';
-  mediaStream: MediaStream;
+  videoTracks: MediaStreamTrack[];
+  audioTracks: MediaStreamTrack[];
 };
 
 export type RecordingStateObject = {
   name: 'RecordingState';
-  mediaStream: MediaStream;
+  videoTracks: MediaStreamTrack[];
+  audioTracks: MediaStreamTrack[];
 };
 
 export type EditStateObject = {
