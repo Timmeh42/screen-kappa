@@ -1,6 +1,6 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
-  frameColor: string;
+  frameColor?: string;
 }>(), {
   frameColor: 'black',
 });
