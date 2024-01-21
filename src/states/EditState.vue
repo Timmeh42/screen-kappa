@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import StreamUIButton from './StreamUIButton.vue';
-import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import StreamUIButton from '../components/StreamUIButton.vue';
+import InterfaceLayout from '../components/InterfaceLayout.vue';
 import type { EditStateObject, AnyStateObject, EmptyStateObject, Recording } from '@/states';
 import { computed, reactive, watch } from 'vue';
-import StreamUITextBox from './StreamUITextBox.vue';
+import StreamUITextBox from '../components/StreamUITextBox.vue';
 
 const props = defineProps<{
   state: EditStateObject;

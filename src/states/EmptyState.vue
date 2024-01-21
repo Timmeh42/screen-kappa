@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import StreamUIText from './StreamUIText.vue';
-import StreamUIButton from './StreamUIButton.vue';
-import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import StreamUIText from '../components/StreamUIText.vue';
+import StreamUIButton from '../components/StreamUIButton.vue';
+import InterfaceLayout from '../components/InterfaceLayout.vue';
+import MetaText from '../components/MetaText.vue';
 import type { EmptyStateObject, ErrorStateObject, AnyStateObject, SelectionStateObject } from '@/states';
-import MetaText from './MetaText.vue';
 
 defineProps<{
   state: EmptyStateObject | ErrorStateObject;

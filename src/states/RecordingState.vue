@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import StreamUIText from './StreamUIText.vue';
-import StreamUIButton from './StreamUIButton.vue';
-import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import StreamUIText from '../components/StreamUIText.vue';
+import StreamUIButton from '../components/StreamUIButton.vue';
+import InterfaceLayout from '../components/InterfaceLayout.vue';
 import type { AnyStateObject, Recording, RecordingStateObject, EditStateObject } from '@/states';
 import { ref } from 'vue';
 

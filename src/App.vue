@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import EmptyState from './components/EmptyState.vue';
-import RecordingState from './components/RecordingState.vue';
-import PreviewState from './components/PreviewState.vue';
-import SelectionState from './components/SelectionState.vue';
-import EditState from './components/EditState.vue';
+import EmptyState from './states/EmptyState.vue';
+import RecordingState from './states/RecordingState.vue';
+import PreviewState from './states/PreviewState.vue';
+import SelectionState from './states/SelectionState.vue';
+import EditState from './states/EditState.vue';
 import RecordingThumbnail from './components/RecordingThumbnail.vue';
 import type { AnyStateObject, EditStateObject, Recording } from './states';
 

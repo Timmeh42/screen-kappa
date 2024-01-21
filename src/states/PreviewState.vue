@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import StreamUIText from './StreamUIText.vue';
-import StreamUIButton from './StreamUIButton.vue';
-import InterfaceLayout from './VideoInterface/InterfaceLayout.vue';
+import StreamUIText from '../components/StreamUIText.vue';
+import StreamUIButton from '../components/StreamUIButton.vue';
+import InterfaceLayout from '../components/InterfaceLayout.vue';
+import MetaText from '../components/MetaText.vue';
+import StreamUIToggle from '../components/StreamUIToggle.vue';
 import { ref, watch } from 'vue';
 import type { PreviewStateObject, AnyStateObject, EmptyStateObject, RecordingStateObject } from '@/states';
-import MetaText from './MetaText.vue';
-import StreamUIToggle from './StreamUIToggle.vue';
 
 const props = defineProps<{
   state: PreviewStateObject;
