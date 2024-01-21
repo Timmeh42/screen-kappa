@@ -46,7 +46,7 @@ const loadRecording = (recordingId: number) => {
 
 <template>
   <div class="container">
-    <div class="side-column" />
+    <div class="side-column ad-space" />
     <div class="main-column">
       <component
         :is="stateComponents[state.name]"
@@ -68,25 +68,33 @@ const loadRecording = (recordingId: number) => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss">
 .container {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: auto;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: center;
   align-content: stretch;
-  padding-top: 2.5rem;
+  padding: 1rem 1rem 0;
 }
 
 .main-column {
-  width: 60%;
-  flex-grow: 0;
+  width: 64%;
+  flex-grow: 1;
 }
 
 .side-column {
-  width: 20%;
-  flex-grow: 0;
+  width: 18%;
+  flex-grow: 1;
+}
+
+.ad-space {
+  @media (max-width: 800px) {
+    width: 100%;
+    height: 6rem;
+  }
 }
 </style>
