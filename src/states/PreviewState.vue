@@ -42,7 +42,15 @@ let streamLabel = 'Untitled recording';
 let videoMonitorStream: MediaStream;
 const firstVideoTrack = props.state.videoTracks[0];
 if (firstVideoTrack !== undefined) {
-  streamLabel = `${firstVideoTrack.label} recording`;
+  const defaultLabel = firstVideoTrack.label;
+  const chromeLabelMatch = defaultLabel.match(/^(screen|window):(\d):\d$/);
+  if (chromeLabelMatch !== null) {
+    const surface = chromeLabelMatch[1];
+    const prefix = chromeLabelMatch[2] === '0' ? 'Primary' : 'Secondary';
+    streamLabel = `${prefix} ${surface} recording`;
+  } else {
+    streamLabel = `${firstVideoTrack.label} recording`;
+  }
   videoMonitorStream = new MediaStream([firstVideoTrack]);
 }
 
@@ -64,6 +72,7 @@ const startRecording = () => {
     name: 'RecordingState',
     videoTracks: props.state.videoTracks,
     audioTracks: recordingAudioTracks,
+    streamLabel,
   };
   emit('setState', newState);
 };

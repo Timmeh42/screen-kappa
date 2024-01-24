@@ -16,11 +16,9 @@ const emit = defineEmits<{
 
 const videoElement = ref<HTMLVideoElement | null>(null);
 
-let streamLabel = 'Untitled recording';
 let videoMonitorStream: MediaStream;
 const firstVideoTrack = props.state.videoTracks[0];
 if (firstVideoTrack !== undefined) {
-  streamLabel = `${firstVideoTrack.label} recording`;
   videoMonitorStream = new MediaStream([firstVideoTrack]);
 }
 
@@ -69,7 +67,7 @@ mediaRecorder.onstop = () => {
   const stopTime = Date.now();
   const recording: Recording = {
     blob: videoBlob,
-    label: streamLabel,
+    label: props.state.streamLabel,
     created: stopTime,
     length: stopTime - startTime,
   };
@@ -105,7 +103,7 @@ for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
   <InterfaceLayout frame-color="#880000">
     <template #header>
       <StreamUIText>
-        {{ streamLabel }}
+        {{ props.state.streamLabel }}
       </StreamUIText>
       <StreamUIText
         highlight

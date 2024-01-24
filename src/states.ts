@@ -16,6 +16,7 @@ export type RecordingStateObject = {
   name: 'RecordingState';
   videoTracks: MediaStreamTrack[];
   audioTracks: MediaStreamTrack[];
+  streamLabel: string;
 };
 
 export type EditStateObject = {
