@@ -35,6 +35,17 @@ for (const audioTrack of props.state.audioTracks) {
     .connect(combinedAudio)
   ;
 }
+
+// if no audio tracks exist, create a silent one to workaround a chrome bug with empty recording blobs
+// https://stackoverflow.com/questions/68620750/getting-empty-blob-from-mediarecorder-when-web-audio-api-is-silent#68644274
+if (props.state.audioTracks.length === 0) {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = 0;
+  oscillator.connect(gainNode);
+  gainNode.connect(combinedAudio);
+}
+
 const recordingStream = new MediaStream([
   ...props.state.videoTracks,
   ...combinedAudio.stream.getAudioTracks(),

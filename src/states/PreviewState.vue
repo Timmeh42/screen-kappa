@@ -124,8 +124,19 @@ watch(useMic, (newValue, oldValue) => {
     <p>
       To start, press the [Select/share source] button to choose a window or screen to record from, just like sharing your screen on a video call.
     </p>
+    <p
+      v-if="state.audioTracks.length === 0"
+      class="boxed-text"
+    >
+      🔇 Your browser isn't sharing sound from your chosen screen or window. If you want to record sound and didn't get an option to do so, you will need to use a browser like Google&nbsp;Chrome or Microsoft&nbsp;Edge.
+    </p>
   </MetaText>
 </template>
 
 <style>
+.boxed-text {
+  padding: 4px 8px;
+  border: 1px solid black;
+  border-radius: 8px;
+}
 </style>
