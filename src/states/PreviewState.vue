@@ -104,13 +104,13 @@ watch(useMic, (newValue, oldValue) => {
     </template>
     <template #footer>
       <StreamUIButton @click="stopSharing">
-        🚫 Stop sharing source
+        🚫 Reset
       </StreamUIButton>
       <StreamUIToggle
         v-model="useMic"
         :labels="['no', 'yes']"
       >
-        Record microphone?
+        🎤 Record mic?
       </StreamUIToggle>
       <StreamUIButton @click="startRecording">
         🎬 Start recording

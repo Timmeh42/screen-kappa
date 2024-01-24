@@ -71,26 +71,17 @@ mediaRecorder.onstop = () => {
   emit('setState', newState);
 };
 
-const stopSharing = () => {
-  mediaRecorder.stop();
-  // stopping the tracks notifies the browser that the screen is no longer being shared
-  for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
-    track.stop();
-  }
-};
-
 const stopRecording = () => {
   mediaRecorder.stop();
 };
 
 // monitor whether mediaStream tracks are active
 // this is because the mediaStream can be stopped through the browser which isnt immediately visible to the app
-
 const checkTracksLiveness = () => {
   const allTracks = [...props.state.videoTracks, ...props.state.audioTracks];
   const allEnded = allTracks.every((track) => track.readyState === 'ended');
   if (allEnded === true) {
-    stopSharing();
+    mediaRecorder.stop();
   }
 };
 
@@ -122,10 +113,10 @@ for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
       />
     </template>
     <template #footer>
-      <StreamUIButton @click="stopSharing">
-        🚫 Stop sharing source
-      </StreamUIButton>
-      <StreamUIButton @click="stopRecording">
+      <StreamUIButton
+        style="margin-left: auto;"
+        @click="stopRecording"
+      >
         ✋ Stop recording
       </StreamUIButton>
     </template>

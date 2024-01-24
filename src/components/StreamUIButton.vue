@@ -22,8 +22,8 @@
   background-color: white;
   flex-shrink: 0;
 
-  &:hover, &:focus {
-    background-color: #d1d1d1;
+  &:hover {
+    background-color: #d8d8d8;
   }
 
   &:active {
