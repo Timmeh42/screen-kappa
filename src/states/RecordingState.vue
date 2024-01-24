@@ -2,6 +2,7 @@
 import StreamUIText from '../components/StreamUIText.vue';
 import StreamUIButton from '../components/StreamUIButton.vue';
 import InterfaceLayout from '../components/InterfaceLayout.vue';
+import MetaText from '../components/MetaText.vue';
 import type { AnyStateObject, Recording, RecordingStateObject, EditStateObject } from '@/states';
 import { ref } from 'vue';
 
@@ -130,4 +131,9 @@ for (const track of [...props.state.videoTracks, ...props.state.audioTracks]) {
       </StreamUIButton>
     </template>
   </InterfaceLayout>
+  <MetaText>
+    <p>
+      You are currently recording. To finish, press [Stop Recording] or cancel the screen share, which will also cleanly save your recording.
+    </p>
+  </MetaText>
 </template>

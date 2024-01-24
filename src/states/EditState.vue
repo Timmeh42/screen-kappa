@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import StreamUIButton from '../components/StreamUIButton.vue';
+import StreamUITextBox from '../components/StreamUITextBox.vue';
 import InterfaceLayout from '../components/InterfaceLayout.vue';
+import MetaText from '../components/MetaText.vue';
 import type { EditStateObject, AnyStateObject, EmptyStateObject, Recording } from '@/states';
 import { computed, reactive, watch } from 'vue';
-import StreamUITextBox from '../components/StreamUITextBox.vue';
 
 const props = defineProps<{
   state: EditStateObject;
@@ -70,6 +71,18 @@ const saveDownload = () => {
       </StreamUIButton>
     </template>
   </InterfaceLayout>
+  <MetaText>
+    <p>
+      Your recording has been finished. You can now replay it to review it, and you can edit the it's name in the text box above the video.
+    </p>
+    <p>
+      Make sure to press [Save to file] to download the recording to your computer.
+    </p>
+    <p>
+      If you are unsatisfied, you can [Delete] it and start again, or press [Done] to add it to the list of recordings from this session.
+      You can click on a previous recording on the right to go back to it for watching or downloading.
+    </p>
+  </MetaText>
 </template>
 
 <style>

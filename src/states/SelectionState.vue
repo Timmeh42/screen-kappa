@@ -2,6 +2,7 @@
 import StreamUIText from '../components/StreamUIText.vue';
 import StreamUIButton from '../components/StreamUIButton.vue';
 import InterfaceLayout from '../components/InterfaceLayout.vue';
+import MetaText from '../components/MetaText.vue';
 import type { SelectionStateObject, AnyStateObject, PreviewStateObject, ErrorStateObject } from '@/states';
 
 defineProps<{
@@ -64,6 +65,12 @@ const cancel = () => {
       </StreamUIButton>
     </template>
   </InterfaceLayout>
+  <MetaText>
+    <p>
+      Your browser should be asking you to select a window or screen to share so that you can record it.
+      If you want to record sound, make sure to select that option if it's available.
+    </p>
+  </MetaText>
 </template>
 
 <style>
