@@ -119,10 +119,10 @@ watch(useMic, (newValue, oldValue) => {
   </InterfaceLayout>
   <MetaText>
     <p>
-      Now you can preview what you are sharing, before recording.
+      Now you can preview what you are sharing, before recording. If you chose the wrong screen or window to record, just press [Reset] to start again.
     </p>
     <p>
-      To start, press the [Select/share source] button to choose a window or screen to record from, just like sharing your screen on a video call.
+      You can choose whether to also record your microphone, and press [Start Recording] when you want to record.
     </p>
     <p
       v-if="state.audioTracks.length === 0"
