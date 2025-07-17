@@ -11,7 +11,7 @@
 
 <style lang="scss">
 .preview-ui-button {
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.5rem;
   color: black;
   line-height: 1;
   white-space: nowrap;

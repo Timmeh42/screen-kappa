@@ -41,7 +41,6 @@ const toggleState = () => {
 <style lang="scss">
 .preview-ui-toggle-choicegroup {
   margin-left: 4px;
-  margin-right: -6px;
   padding: 3px 2px;
   border-radius: 9999px;
   background-color: rgb(187, 187, 187);
